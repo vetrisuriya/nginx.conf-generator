@@ -1,0 +1,79 @@
+{
+  "mime_types_include": "/etc/nginx/mime.types",
+  "default_type": "application/octet-stream",
+  "include_files": ["/etc/nginx/conf.d/*.conf"],
+  "env_variables": {
+    "APP_ENV": "production"
+  },
+  "upstreams": [
+    {
+      "name": "app_backend",
+      "servers": [
+        "127.0.0.1:3000 max_fails=3 fail_timeout=30s",
+        "127.0.0.1:3001 max_fails=3 fail_timeout=30s"
+      ],
+      "directives": [
+        "least_conn"
+      ]
+    }
+  ],
+  "http_directives": [
+    "sendfile on",
+    "keepalive_timeout 65"
+  ],
+  "servers": [
+    {
+      "listen": [80],
+      "server_name": "example.com www.example.com",
+      "root": "/var/www/example",
+      "index": ["index.html", "index.htm"],
+      "error_log": "/var/log/nginx/example.error.log warn",
+      "access_log": "/var/log/nginx/example.access.log main",
+      "rewrites": [
+        "^/old/(.*)$ /new/$1 permanent"
+      ],
+      "redirects": [
+        "301 https://$host$request_uri"
+      ],
+      "try_files": "$uri $uri/ @app",
+      "locations": [
+        {
+          "modifier": "=",
+          "pattern": "/healthz",
+          "directives": [
+            "return 200 'ok'"
+          ]
+        },
+        {
+          "modifier": "^~",
+          "pattern": "/assets/",
+          "directives": [
+            "expires 1y",
+            "add_header Cache-Control 'public, immutable'"
+          ]
+        },
+        {
+          "modifier": "~*",
+          "pattern": "\\.(png|jpg|jpeg|gif|ico)$",
+          "directives": [
+            "expires 30d"
+          ]
+        },
+        {
+          "pattern": "/",
+          "directives": [
+            "proxy_pass http://app_backend",
+            "proxy_set_header Host $host",
+            "proxy_set_header X-Real-IP $remote_addr"
+          ]
+        },
+        {
+          "pattern": "@app",
+          "directives": [
+            "proxy_pass http://app_backend"
+          ]
+        }
+      ]
+    }
+  ]
+}
