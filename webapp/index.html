@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nginx Config Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="badge">Dynamic Generator</p>
+        <h1>Nginx Config Studio</h1>
+        <p>Create production-ready <code>nginx.conf</code> with live preview and one-click download.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="downloadBtn">Download nginx.conf</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card controls">
+        <h2>Global Settings</h2>
+        <div class="grid two">
+          <label>Server Name
+            <input id="serverName" value="example.com www.example.com" />
+          </label>
+          <label>Root Directory
+            <input id="root" value="/var/www/example" />
+          </label>
+          <label>Listen Port
+            <input id="listen" type="number" min="1" value="80" />
+          </label>
+          <label>Default Type
+            <input id="defaultType" value="application/octet-stream" />
+          </label>
+          <label>Error Log
+            <input id="errorLog" value="/var/log/nginx/example.error.log warn" />
+          </label>
+          <label>Access Log
+            <input id="accessLog" value="/var/log/nginx/example.access.log main" />
+          </label>
+        </div>
+
+        <h2>Routing Features</h2>
+        <div class="grid two">
+          <label>Rewrite Rule
+            <input id="rewrite" value="^/old/(.*)$ /new/$1 permanent" />
+          </label>
+          <label>Redirect
+            <input id="redirect" value="301 https://$host$request_uri" />
+          </label>
+          <label class="full">Try Files
+            <input id="tryFiles" value="$uri $uri/ @app" />
+          </label>
+        </div>
+
+        <h2>Location Blocks</h2>
+        <p class="helper">Add location rules and reorder automatically using nginx precedence.</p>
+        <div id="locations"></div>
+        <button id="addLocationBtn" class="secondary">+ Add Location</button>
+      </section>
+
+      <section class="card preview">
+        <div class="preview-header">
+          <h2>Live nginx.conf Preview</h2>
+          <span id="status">Auto-updated</span>
+        </div>
+        <pre id="preview"></pre>
+      </section>
+    </main>
+
+    <template id="locationTemplate">
+      <div class="location-row">
+        <select data-field="modifier">
+          <option value="">prefix</option>
+          <option value="=">exact (=)</option>
+          <option value="^~">preferential prefix (^~)</option>
+          <option value="~">regex case-sensitive (~)</option>
+          <option value="~*">regex case-insensitive (~*)</option>
+        </select>
+        <input data-field="pattern" placeholder="/path or regex" />
+        <input data-field="directives" placeholder="directive1 | directive2" />
+        <button data-action="remove" class="danger">Remove</button>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
